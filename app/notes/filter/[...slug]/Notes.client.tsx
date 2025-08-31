@@ -7,22 +7,19 @@ import { useDebouncedCallback } from "use-debounce";
 import NoteList from "@/components/NoteList/NoteList";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBox from "@/components/SearchBox/SearchBox";
-import Modal from "@/components/Modal/Modal";
-import NoteForm from "@/components/NoteForm/NoteForm";
 import Loader from "@/components/Loader/Loader";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import styles from "./Notes.module.css";
+import Link from "next/link";
 
 interface NotesClientProps {
-    initialData: Awaited<ReturnType<typeof fetchNotes>>;
     tag?: string;
 }
 
-export default function NotesClient({ initialData, tag }: NotesClientProps) {
+export default function NotesClient({ tag }: NotesClientProps) {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
-    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const handleSearch = useDebouncedCallback((search: string) => {
         setDebouncedSearch(search);
@@ -44,8 +41,6 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
                 tag,
             }),
         placeholderData: keepPreviousData,
-        initialData:
-            page === 1 && !debouncedSearch && !tag ? initialData : undefined,
     });
 
     return (
@@ -59,13 +54,9 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
                         onPageChange={setPage}
                     />
                 )}
-                <button
-                    className={styles.button}
-                    type="button"
-                    onClick={() => setModalIsOpen(true)}
-                >
+                <Link href="/notes/action/create" className={styles.button}>
                     Create +
-                </button>
+                </Link>
             </header>
             {isLoading && !data && <Loader />}
             {isError && <ErrorMessage />}
@@ -73,12 +64,6 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
                 <NoteList notes={data.data} />
             ) : (
                 !isLoading && <p>No notes found</p>
-            )}
-
-            {modalIsOpen && (
-                <Modal onClose={() => setModalIsOpen(false)}>
-                    <NoteForm onClose={() => setModalIsOpen(false)} />
-                </Modal>
             )}
         </div>
     );
